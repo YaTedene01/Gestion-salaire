@@ -1,0 +1,87 @@
+model Payment {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  amount     Float
+  mode       PaymentMode
+  date       DateTime  @default(now())
+  receiptUrl String?
+  employee   Employee  @relation(fields: [employeeId], references: [id])
+}
+
+enum PaymentMode {
+  ESPECES
+  VIREMENT
+  ORANGE_MONEY
+  WAVE
+}
+
+enum PeriodType {
+  MENSUEL
+  HEBDO
+  JOURNALIER
+}
+
+model Employee {
+  id           Int      @id @default(autoincrement())
+  fullName     String
+  position     String
+  contractType ContractType
+  salary       Float
+  bankDetails  String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  payments     Payment[]
+}
+
+enum ContractType {
+  JOURNALIER
+  FIXE
+  HONORAIRE
+}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  logo      String?
+  color     String   @default("#3b82f6")
+  address   String?
+  currency  String  @default("FCFA")
+  period    PeriodType @default(MENSUEL)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  CASHIER
+  USER
+}
