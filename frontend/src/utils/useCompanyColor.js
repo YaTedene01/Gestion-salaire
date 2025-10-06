@@ -7,7 +7,13 @@ export function useCompanyColor() {
   useEffect(() => {
     const update = () => {
       const company = getSelectedCompany();
-      setColor(company?.color || '#22c55e');
+      // Superadmin uses default app colors, not company colors
+      const userRole = localStorage.getItem('role');
+      if (userRole === 'SUPER_ADMIN') {
+        setColor('#22c55e'); // Default app color
+      } else {
+        setColor(company?.color || '#22c55e');
+      }
     };
     window.addEventListener('storage', update);
     update();

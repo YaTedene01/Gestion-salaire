@@ -4,23 +4,31 @@ import { useSelectedCompany } from '../utils/useCompanyColor';
 import { Link, useLocation } from 'react-router-dom';
 
 const getMenuItems = (userRole) => {
-  const baseMenu = [
-    { path: '/dashboard', label: 'Dashboard' },
-    { path: '/companies', label: 'Entreprises' },
-  ];
-
-  // Super admin ne voit que Dashboard et Entreprises
-  if (userRole === 'SUPER_ADMIN') {
-    return baseMenu;
+  switch (userRole) {
+    case 'SUPER_ADMIN':
+      return [
+        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/companies', label: 'Entreprises' },
+      ];
+    case 'ADMIN':
+      return [
+        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/users', label: 'Utilisateurs' },
+        { path: '/employees', label: 'Employés' },
+        { path: '/attendance', label: 'Présences' },
+        { path: '/payruns', label: 'Cycles de Paie' },
+      ];
+    case 'CASHIER':
+      return [
+        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/payslips', label: 'Bulletins' },
+        { path: '/payments', label: 'Paiements' },
+      ];
+    default:
+      return [
+        { path: '/dashboard', label: 'Dashboard' },
+      ];
   }
-
-  // Autres rôles voient tous les éléments
-  return [
-    ...baseMenu,
-    { path: '/users', label: 'Utilisateurs' },
-    { path: '/employees', label: 'Employés' },
-    { path: '/payments', label: 'Paiements' },
-  ];
 };
 
 

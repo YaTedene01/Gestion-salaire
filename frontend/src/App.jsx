@@ -11,6 +11,11 @@ import UserList from './components/UserList';
 import EmployeeList from './components/EmployeeList';
 import EmployeeDetail from './components/EmployeeDetail';
 import PaymentList from './components/PaymentList';
+import PayRunList from './components/PayRunList';
+import PaySlipList from './components/PaySlipList';
+import PaySlipDetail from './components/PaySlipDetail';
+import PaySlipsCashier from './pages/PaySlipsCashier';
+import AttendancePage from './pages/AttendancePage';
 
 const PrivateRoute = ({ children, role }) => {
   const token = localStorage.getItem('token');
@@ -191,8 +196,8 @@ function App() {
               <div className="flex min-h-screen">
                 <Sidebar />
                 <div className="flex-1 bg-white">
-                  <header className="flex items-center gap-3 px-8 py-7 bg-[#22c55e] fixed top-0 left-60 right-0 z-40 shadow" style={{minHeight:'72px'}}>
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-[#22c55e] text-2xl">P</div>
+                  <header className="flex items-center gap-3 px-8 py-7 fixed top-0 left-60 right-0 z-40 shadow" style={{minHeight:'72px', background: companyColor}}>
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-2xl" style={{ color: companyColor }}>P</div>
                     <div className="flex flex-col ml-2">
                       <span className="text-lg font-bold text-black">{displayName}</span>
                       <span className="text-xs text-white font-semibold uppercase tracking-wide">{userRole}</span>
@@ -200,6 +205,124 @@ function App() {
                   </header>
                   <div className="p-4" style={{marginTop:'72px'}}>
                     <PaymentList />
+                  </div>
+                </div>
+              </div>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/attendance"
+          element={
+            userRole === "SUPER_ADMIN" ? <Navigate to="/companies" replace /> :
+            <PrivateRoute>
+              <div className="flex min-h-screen">
+                <Sidebar />
+                <div className="flex-1 bg-white">
+                  <header className="flex items-center gap-3 px-8 py-7 fixed top-0 left-60 right-0 z-40 shadow" style={{minHeight:'72px', background: companyColor}}>
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-2xl" style={{ color: companyColor }}>P</div>
+                    <div className="flex flex-col ml-2">
+                      <span className="text-lg font-bold text-black">{displayName}</span>
+                      <span className="text-xs text-white font-semibold uppercase tracking-wide">{userRole}</span>
+                    </div>
+                  </header>
+                  <div className="p-4" style={{marginTop:'72px'}}>
+                    <AttendancePage />
+                  </div>
+                </div>
+              </div>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payruns"
+          element={
+            userRole === "SUPER_ADMIN" ? <Navigate to="/companies" replace /> :
+            <PrivateRoute>
+              <div className="flex min-h-screen">
+                <Sidebar />
+                <div className="flex-1 bg-white">
+                  <header className="flex items-center gap-3 px-8 py-7 fixed top-0 left-60 right-0 z-40 shadow" style={{minHeight:'72px', background: companyColor}}>
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-2xl" style={{ color: companyColor }}>P</div>
+                    <div className="flex flex-col ml-2">
+                      <span className="text-lg font-bold text-black">{displayName}</span>
+                      <span className="text-xs text-white font-semibold uppercase tracking-wide">{userRole}</span>
+                    </div>
+                  </header>
+                  <div className="p-4" style={{marginTop:'72px'}}>
+                    <PayRunList />
+                  </div>
+                </div>
+              </div>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payruns/:id/payslips"
+          element={
+            userRole === "SUPER_ADMIN" ? <Navigate to="/companies" replace /> :
+            <PrivateRoute>
+              <div className="flex min-h-screen">
+                <Sidebar />
+                <div className="flex-1 bg-white">
+                  <header className="flex items-center gap-3 px-8 py-7 fixed top-0 left-60 right-0 z-40 shadow" style={{minHeight:'72px', background: companyColor}}>
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-2xl" style={{ color: companyColor }}>P</div>
+                    <div className="flex flex-col ml-2">
+                      <span className="text-lg font-bold text-black">{displayName}</span>
+                      <span className="text-xs text-white font-semibold uppercase tracking-wide">{userRole}</span>
+                    </div>
+                  </header>
+                  <div className="p-4" style={{marginTop:'72px'}}>
+                    <PaySlipList />
+                  </div>
+                </div>
+              </div>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payslips/:id"
+          element={
+            userRole === "SUPER_ADMIN" ? <Navigate to="/companies" replace /> :
+            <PrivateRoute>
+              <div className="flex min-h-screen">
+                <Sidebar />
+                <div className="flex-1 bg-white">
+                  <header className="flex items-center gap-3 px-8 py-7 fixed top-0 left-60 right-0 z-40 shadow" style={{minHeight:'72px', background: companyColor}}>
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-2xl" style={{ color: companyColor }}>P</div>
+                    <div className="flex flex-col ml-2">
+                      <span className="text-lg font-bold text-black">{displayName}</span>
+                      <span className="text-xs text-white font-semibold uppercase tracking-wide">{userRole}</span>
+                    </div>
+                  </header>
+                  <div className="p-4" style={{marginTop:'72px'}}>
+                    <PaySlipDetail />
+                  </div>
+                </div>
+              </div>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payslips"
+          element={
+            userRole === "SUPER_ADMIN" ? <Navigate to="/companies" replace /> :
+            <PrivateRoute>
+              <div className="flex min-h-screen">
+                <Sidebar />
+                <div className="flex-1 bg-white">
+                  <header className="flex items-center gap-3 px-8 py-7 fixed top-0 left-60 right-0 z-40 shadow" style={{minHeight:'72px', background: companyColor}}>
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-2xl" style={{ color: companyColor }}>P</div>
+                    <div className="flex flex-col ml-2">
+                      <span className="text-lg font-bold text-black">{displayName}</span>
+                      <span className="text-xs text-white font-semibold uppercase tracking-wide">{userRole}</span>
+                    </div>
+                  </header>
+                  <div className="p-4" style={{marginTop:'72px'}}>
+                    {(() => {
+                      console.log('Rendering payslips route, userRole:', userRole);
+                      return userRole === 'CASHIER' ? <PaySlipsCashier /> : <Navigate to="/dashboard" replace />;
+                    })()}
                   </div>
                 </div>
               </div>

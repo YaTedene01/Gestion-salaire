@@ -74,6 +74,13 @@ export const companyAPI = {
 
 export const employeeAPI = {
   create: (employeeData) => api.post('/employees', employeeData),
+  import: (csvFile) => {
+    const formData = new FormData();
+    formData.append('csvFile', csvFile);
+    return api.post('/employees/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
   getAll: (filters = {}) => {
     const params = new URLSearchParams();
     Object.keys(filters).forEach(key => {
@@ -87,6 +94,9 @@ export const employeeAPI = {
   update: (id, data) => api.put(`/employees/${id}`, data),
   delete: (id) => api.delete(`/employees/${id}`),
   setActive: (id, isActive) => api.patch(`/employees/${id}/active`, { isActive }),
+  generateQRCode: (id) => api.post(`/employees/${id}/qr-code`),
+  getQRCode: (id) => api.get(`/employees/${id}/qr-code`),
+  generateAllQRCodes: () => api.post('/employees/generate-qr-codes'),
 };
 
 export const paymentAPI = {
@@ -103,6 +113,31 @@ export const paymentAPI = {
   },
   getAll: () => api.get('/payments'),
   getById: (id) => api.get(`/payments/${id}`),
+};
+
+export const payrunAPI = {
+  create: (payrunData) => api.post('/payruns', payrunData),
+  getAll: () => api.get('/payruns'),
+  getById: (id) => api.get(`/payruns/${id}`),
+  updateStatus: (id, status) => api.patch(`/payruns/${id}/status`, { status }),
+  generatePaySlips: (id) => api.post(`/payruns/${id}/generate`),
+  delete: (id) => api.delete(`/payruns/${id}`),
+};
+
+export const payslipAPI = {
+  getAllApproved: () => api.get('/payslips?status=APPROVED'),
+  getByPayRun: (payrunId) => api.get(`/payruns/${payrunId}/payslips`),
+  getById: (id) => api.get(`/payslips/${id}`),
+  update: (id, data) => api.put(`/payslips/${id}`, data),
+};
+
+export const userAPI = {
+  create: (userData) => api.post('/auth/create-admin', userData),
+  getAll: () => api.get('/auth/users'),
+  getById: (id) => api.get(`/users/${id}`),
+  update: (id, data) => api.put(`/users/${id}`, data),
+  setActive: (id, isActive) => api.patch(`/auth/users/${id}/active`, { isActive }),
+  delete: (id) => api.delete(`/auth/users/${id}`),
 };
 
 export default api;

@@ -10,12 +10,13 @@ export function useTheme() {
 
 export function ThemeProvider({ children }) {
   const selectedCompany = useSelectedCompany();
+  const userRole = localStorage.getItem('role');
 
   // Couleur par défaut
   const defaultColor = '#22c55e';
 
-  // Couleur actuelle de l'entreprise
-  const currentColor = selectedCompany?.color || defaultColor;
+  // Pour le super admin, toujours utiliser la couleur par défaut
+  const currentColor = userRole === 'SUPER_ADMIN' ? defaultColor : (selectedCompany?.color || defaultColor);
 
   useEffect(() => {
     // Appliquer les variables CSS dynamiques

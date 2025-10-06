@@ -1,23 +1,69 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { User, Briefcase, FileText, DollarSign, CreditCard, Calendar, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { User, Briefcase, FileText, DollarSign, CreditCard, Calendar, ArrowLeft, CheckCircle, XCircle, QrCode, Download } from 'lucide-react';
 
 const EmployeeDetail = () => {
   const { id } = useParams();
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [qrCode, setQrCode] = useState(null);
+  const [generatingQR, setGeneratingQR] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    fetch(`http://localhost:5000/api/employees/${id}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => res.json())
-      .then(data => setEmployee(data))
-      .catch(() => setError('Erreur lors du chargement'))
-      .finally(() => setLoading(false));
+    loadEmployeeData();
   }, [id]);
+
+  const loadEmployeeData = async () => {
+    setLoading(true);
+    try {
+      // Load employee data
+      const employeeRes = await fetch(`http://localhost:5000/api/employees/${id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const employeeData = await employeeRes.json();
+      setEmployee(employeeData);
+
+      // Load QR code if it exists
+      if (employeeData) {
+        loadQRCode();
+      }
+    } catch (error) {
+      setError('Erreur lors du chargement');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadQRCode = async () => {
+    try {
+      const qrRes = await fetch(`http://localhost:5000/api/attendance/employee/${id}/qr-code`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (qrRes.ok) {
+        const qrData = await qrRes.json();
+        setQrCode(qrData.qrCode);
+      }
+    } catch (error) {
+      console.log('QR code not available');
+    }
+  };
+
+  const generateQRCode = async () => {
+    setGeneratingQR(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/attendance/employee/${id}/qr-code`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      setQrCode(data.qrCode);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    } finally {
+      setGeneratingQR(false);
+    }
+  };
 
   const formatSalary = (salary) => {
     return new Intl.NumberFormat('fr-FR').format(salary);
@@ -168,6 +214,59 @@ const EmployeeDetail = () => {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* QR Code Card */}
+          <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-6">
+            <h3 className="font-semibold text-slate-800 mb-4">Code QR de présence</h3>
+            <div className="text-center">
+              {qrCode ? (
+                <div className="space-y-4">
+                  <img
+                    src={qrCode}
+                    alt="QR Code"
+                    className="mx-auto border-2 border-gray-200 rounded-lg"
+                    style={{ maxWidth: '200px', width: '100%' }}
+                  />
+                  <p className="text-sm text-gray-600">
+                    Ce code QR permet à l'employé de marquer sa présence chaque matin
+                  </p>
+                  <button
+                    onClick={() => window.open(qrCode, '_blank')}
+                    className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition"
+                  >
+                    <Download size={16} />
+                    Télécharger
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="w-32 h-32 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
+                    <QrCode size={48} className="text-gray-400" />
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Aucun code QR généré pour cet employé
+                  </p>
+                  <button
+                    onClick={generateQRCode}
+                    disabled={generatingQR}
+                    className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {generatingQR ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Génération...
+                      </>
+                    ) : (
+                      <>
+                        <QrCode size={16} />
+                        Générer QR Code
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

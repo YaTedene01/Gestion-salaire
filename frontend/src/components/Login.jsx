@@ -35,6 +35,21 @@ const Login = () => {
       localStorage.setItem('email', user.email);
       localStorage.setItem('userId', user.id.toString());
 
+      // Charger les entreprises si nécessaire
+      if (user.role !== 'SUPER_ADMIN') {
+        try {
+          const companiesRes = await fetch('http://localhost:5000/api/companies', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (companiesRes.ok) {
+            const companies = await companiesRes.json();
+            localStorage.setItem('companies', JSON.stringify(companies));
+          }
+        } catch (err) {
+          console.error('Erreur chargement entreprises:', err);
+        }
+      }
+
       // Stocker l'ID de l'entreprise si l'utilisateur en a une
       if (user.companyId) {
         localStorage.setItem('selectedCompanyId', user.companyId.toString());

@@ -1,18 +1,22 @@
 model Payment {
-  id         Int      @id @default(autoincrement())
-  employeeId Int
-  amount     Float
-  mode       PaymentMode
-  date       DateTime  @default(now())
-  receiptUrl String?
-  employee   Employee  @relation(fields: [employeeId], references: [id])
-}
+   id           Int         @id @default(autoincrement())
+   paySlipId    Int
+   amount       Float
+   mode         PaymentMode
+   reference    String?
+   notes        String?
+   receiptNumber String?     @unique
+   date         DateTime     @default(now())
+   receiptUrl   String?
+   paySlip      PaySlip      @relation(fields: [paySlipId], references: [id])
+ }
 
 enum PaymentMode {
   ESPECES
   VIREMENT
   ORANGE_MONEY
   WAVE
+  FREE_MONEY
 }
 
 enum PeriodType {
@@ -22,16 +26,20 @@ enum PeriodType {
 }
 
 model Employee {
-  id           Int      @id @default(autoincrement())
-  fullName     String
-  position     String
-  contractType ContractType
-  salary       Float
-  bankDetails  String?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  payments     Payment[]
+    id           Int      @id @default(autoincrement())
+    fullName     String
+    position     String
+    contractType ContractType
+    salary       Float
+    bankDetails  String?
+    companyId    Int
+    company      Company  @relation(fields: [companyId], references: [id])
+    isActive     Boolean  @default(true)
+    qrCode       String?  @unique
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    paySlips     PaySlip[]
+    attendances  Attendance[]
 }
 
 enum ContractType {
@@ -55,14 +63,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      Role     @default(USER)
-  companyId Int?
-  company   Company? @relation(fields: [companyId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    password  String
+    role      Role     @default(USER)
+    companyId Int?
+    company   Company? @relation(fields: [companyId], references: [id])
+    isActive  Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Company {
@@ -77,6 +86,8 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   users     User[]
+  employees Employee[]
+  payRuns   PayRun[]
 }
 
 enum Role {
@@ -84,4 +95,69 @@ enum Role {
   ADMIN
   CASHIER
   USER
+}
+
+enum PayRunStatus {
+  DRAFT
+  APPROVED
+  CLOSED
+}
+
+enum PaySlipStatus {
+  PENDING
+  APPROVED
+  PARTIAL
+  PAID
+}
+
+model PayRun {
+  id          Int      @id @default(autoincrement())
+  name        String
+  companyId   Int
+  company     Company  @relation(fields: [companyId], references: [id])
+  startDate   DateTime
+  endDate     DateTime
+  periodType  PeriodType
+  status      PayRunStatus @default(DRAFT)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  paySlips    PaySlip[]
+}
+
+model PaySlip {
+  id          Int      @id @default(autoincrement())
+  payRunId    Int
+  payRun      PayRun   @relation(fields: [payRunId], references: [id])
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  grossSalary Float
+  deductions  Float    @default(0)
+  netSalary   Float
+  daysWorked  Int?
+  status      PaySlipStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  payments    Payment[]
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+}
+
+model Attendance {
+  id          Int               @id @default(autoincrement())
+  employeeId  Int
+  employee    Employee          @relation(fields: [employeeId], references: [id])
+  date        DateTime          @db.Date
+  checkInTime DateTime
+  checkOutTime DateTime?
+  status      AttendanceStatus  @default(PRESENT)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([employeeId, date])
 }

@@ -33,6 +33,18 @@ app.use('/api/auth', AuthRoute);
 import EmployeeRoute from './routes/EmployeeRoute';
 app.use('/api/employees', EmployeeRoute);
 
+import PaySlipRoute from './routes/PaySlipRoute';
+app.use('/api/payslips', PaySlipRoute);
+
+import PayRunRoute from './routes/PayRunRoute';
+app.use('/api/payruns', PayRunRoute);
+
+import UserRoute from './routes/UserRoute';
+app.use('/api/users', UserRoute);
+
+import AttendanceRoute from './routes/AttendanceRoute';
+app.use('/api/attendance', AttendanceRoute);
+
 app.get('/', (req: Request, res: Response) => {
   res.json({ 
     message: 'API Gestion Salaire - Backend fonctionne!',

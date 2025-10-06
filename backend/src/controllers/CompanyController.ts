@@ -2,6 +2,14 @@ import { Request, Response } from 'express';
 import path from 'path';
 import { CompanyService } from '../services/CompanyService';
 
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    role: string;
+    companyId?: number;
+  };
+}
+
 export class CompanyController {
   static async create(req: Request, res: Response) {
     try {
@@ -25,9 +33,20 @@ export class CompanyController {
     }
   }
 
-  static async getAll(req: Request, res: Response) {
+  static async getAll(req: AuthRequest, res: Response) {
     try {
-      const companies = await CompanyService.getAll();
+      let companies: any[];
+      if (req.user?.role === 'SUPER_ADMIN') {
+        companies = await CompanyService.getAll();
+      } else {
+        // For admin and other roles, show only their company
+        if (req.user?.companyId) {
+          const company = await CompanyService.getById(req.user.companyId);
+          companies = company ? [company] : [];
+        } else {
+          companies = [];
+        }
+      }
       res.json(companies);
     } catch (error: any) {
       res.status(400).json({ error: error.message });

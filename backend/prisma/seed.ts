@@ -4,6 +4,17 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  // Entreprise
+  const company = await prisma.company.create({
+    data: {
+      name: 'DemoCorp',
+      logo: '',
+      address: 'Dakar',
+      currency: 'FCFA',
+      period: 'MENSUEL',
+    },
+  });
+
   // Super Admin
   const superAdmin = await prisma.user.upsert({
     where: { email: 'superadmin@demo.com' },
@@ -21,8 +32,9 @@ async function main() {
     update: {},
     create: {
       email: 'admin@demo.com',
-      password: await bcrypt.hash('admin123', 10),
+      password: await bcrypt.hash('123', 10),
       role: 'ADMIN',
+      companyId: company.id,
     },
   });
 
@@ -34,53 +46,13 @@ async function main() {
       email: 'user@demo.com',
       password: await bcrypt.hash('user123', 10),
       role: 'USER',
+      companyId: company.id,
     },
   });
 
-  // Entreprise
-  const company = await prisma.company.create({
-    data: {
-      name: 'DemoCorp',
-      logo: '',
-      address: 'Dakar',
-      currency: 'FCFA',
-      period: 'MENSUEL',
-    },
-  });
-
-  // Employés
-  const emp1 = await prisma.employee.create({
-    data: {
-      fullName: 'Mamadou Diop',
-      position: 'Développeur',
-      contractType: 'FIXE',
-      salary: 750000,
-      bankDetails: 'BICIS',
-      isActive: true,
-    },
-  });
-  const emp2 = await prisma.employee.create({
-    data: {
-      fullName: 'Fatou Sall',
-      position: 'Comptable',
-      contractType: 'FIXE',
-      salary: 650000,
-      bankDetails: 'SGBS',
-      isActive: true,
-    },
-  });
-  const emp3 = await prisma.employee.create({
-    data: {
-      fullName: 'Ibrahima Ndiaye',
-      position: 'Manager',
-      contractType: 'HONORAIRE',
-      salary: 850000,
-      bankDetails: 'Ecobank',
-      isActive: true,
-    },
-  });
-
-  console.log('Seed terminé : super admin, admin, user, entreprise, employés créés');
+  console.log('Seed terminé : super admin, admin, user, entreprise créés');
+  console.log('Admin email:', admin.email);
+  console.log('Admin password: 123');
 }
 
 main()
