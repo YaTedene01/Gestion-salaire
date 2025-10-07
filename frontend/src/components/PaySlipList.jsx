@@ -86,7 +86,7 @@ const PaySlipList = () => {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto py-8 px-4">
+      <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="mb-4 flex justify-center">
         <button
           onClick={() => window.history.back()}
@@ -104,7 +104,7 @@ const PaySlipList = () => {
       </div>
 
       {/* List of payslips */}
-      <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden mx-auto" style={{ maxWidth: '800px' }}>
         <div className="px-6 py-4 text-center" style={{ backgroundColor: 'var(--company-color)' }}>
           <div className="flex items-center justify-center gap-3">
             <div className="bg-white/20 p-2 rounded-lg">
