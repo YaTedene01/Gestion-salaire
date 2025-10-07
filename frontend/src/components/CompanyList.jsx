@@ -3,6 +3,29 @@ import { companyAPI } from '../utils/api';
 import { validateCompanyData, hasErrors } from '../utils/validation';
 import { useAsync } from '../utils/useAsync';
 
+// Simple notification component
+const Notification = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+      type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+    }`}>
+      <div className="flex items-center justify-between">
+        <span>{message}</span>
+        <button onClick={onClose} className="ml-4 text-white hover:text-gray-200">
+          ×
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const CompanyList = () => {
   const [companies, setCompanies] = useState([]);
   const [form, setForm] = useState({
@@ -11,16 +34,33 @@ const CompanyList = () => {
   });
   const [logoFile, setLogoFile] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+  const [notification, setNotification] = useState(null);
   const { loading, error, execute } = useAsync();
   const userRole = localStorage.getItem('role');
+  const userEmail = localStorage.getItem('email');
+  const superAdminEmail = 'superadmin@demo.com'; // Default superadmin email - should match the actual superadmin
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+  };
+
+  const closeNotification = () => {
+    setNotification(null);
+  };
 
   // Récupérer la liste des entreprises
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
         console.log('Chargement des entreprises...');
+        console.log('User role:', userRole);
+        console.log('User email:', userEmail);
         const response = await companyAPI.getAll();
         console.log('Entreprises reçues:', response.data);
+        console.log('Checking invitedSuperAdmins for each company:');
+        response.data.forEach(company => {
+          console.log(`Company ${company.id} (${company.name}): invitedSuperAdmins =`, company.invitedSuperAdmins);
+        });
         setCompanies(response.data);
         localStorage.setItem('companies', JSON.stringify(response.data));
       } catch (err) {
@@ -59,7 +99,6 @@ const CompanyList = () => {
 
     } catch (err) {
       console.error('Erreur lors de la modification du statut de l\'entreprise:', err);
-      alert('Erreur lors de la modification du statut de l\'entreprise');
     }
   };
 
@@ -86,7 +125,54 @@ const CompanyList = () => {
 
     } catch (err) {
       console.error('Erreur lors de la suppression de l\'entreprise:', err);
-      alert('Erreur lors de la suppression de l\'entreprise');
+    }
+  };
+
+  // Inviter le super admin
+  const handleInviteSuperAdmin = async (companyId) => {
+    try {
+      console.log('Inviting superadmin for company:', companyId, 'email:', superAdminEmail);
+
+      await execute(companyAPI.inviteSuperAdmin, companyId, { superAdminEmail });
+
+      // Mettre à jour la liste des entreprises pour refléter le changement
+      setCompanies(prevCompanies => {
+        const updatedCompanies = prevCompanies.map(company =>
+          company.id === companyId
+            ? { ...company, invitedSuperAdmins: [...(company.invitedSuperAdmins || []), superAdminEmail] }
+            : company
+        );
+        console.log('Updated companies after invite:', updatedCompanies.find(c => c.id === companyId)?.invitedSuperAdmins);
+        return updatedCompanies;
+      });
+
+      console.log('Super admin invité avec succès');
+    } catch (err) {
+      console.error('Erreur lors de l\'invitation du super admin:', err);
+    }
+  };
+
+  // Retirer l'invitation du super admin
+  const handleRemoveSuperAdminInvite = async (companyId) => {
+    try {
+      console.log('Removing superadmin invite for company:', companyId, 'email:', superAdminEmail);
+
+      await execute(companyAPI.removeSuperAdminInvite, companyId, { superAdminEmail });
+
+      // Mettre à jour la liste des entreprises
+      setCompanies(prevCompanies => {
+        const updatedCompanies = prevCompanies.map(company =>
+          company.id === companyId
+            ? { ...company, invitedSuperAdmins: (company.invitedSuperAdmins || []).filter(email => email !== superAdminEmail) }
+            : company
+        );
+        console.log('Updated companies after remove:', updatedCompanies.find(c => c.id === companyId)?.invitedSuperAdmins);
+        return updatedCompanies;
+      });
+
+      console.log('Invitation du super admin retirée');
+    } catch (err) {
+      console.error('Erreur lors du retrait de l\'invitation:', err);
     }
   };
 
@@ -155,7 +241,15 @@ const CompanyList = () => {
   };
 
   return (
-  <div className="max-w-4xl mx-auto py-8 px-4">
+  <>
+    {notification && (
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        onClose={closeNotification}
+      />
+    )}
+    <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-black mb-2">Gestion des Entreprises</h2>
         <p className="text-black">Créez et gérez les entreprises de votre plateforme</p>
@@ -420,9 +514,39 @@ const CompanyList = () => {
                       : 'cursor-not-allowed border-gray-200 opacity-60'
                   }`}
                   style={company.isActive ? { borderColor: 'var(--company-color-border)' } : {}}
-                  onClick={() => {
+                  onClick={async () => {
                     if (!company.isActive) return; // Ne rien faire si l'entreprise est inactive
-                    if (userRole === 'SUPER_ADMIN') return; // Super admin ne peut pas sélectionner d'entreprise
+
+                    if (userRole === 'SUPER_ADMIN') {
+                      // Vérifier si le super admin a accès à cette entreprise
+                      try {
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`http://localhost:5000/api/companies/${company.id}/check-super-admin-access?superAdminEmail=${userEmail}`, {
+                          headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                          }
+                        });
+                        const data = await response.json();
+
+                        if (data.hasAccess) {
+                          localStorage.setItem('selectedCompanyId', company.id);
+                          localStorage.setItem('originalRole', userRole); // Store original role
+                          localStorage.setItem('role', 'ADMIN'); // Become admin for this company
+                          window.dispatchEvent(new Event('storage'));
+                          window.location.href = '/dashboard';
+                        } else {
+                          // Show notification instead of alert
+                          showNotification('Vous n\'avez pas accès à cette entreprise. Demandez une invitation à l\'administrateur.', 'error');
+                        }
+                      } catch (error) {
+                        console.error('Erreur lors de la vérification d\'accès:', error);
+                        // No alert for errors either
+                      }
+                      return;
+                    }
+
+                    // Pour les autres rôles (ADMIN, CASHIER, USER)
                     localStorage.setItem('selectedCompanyId', company.id);
                     window.dispatchEvent(new Event('storage'));
                     // Redirection vers le dashboard après sélection
@@ -545,6 +669,43 @@ const CompanyList = () => {
                             </button>
                           </div>
                         )}
+
+                        {/* Bouton d'invitation pour les admins de cette entreprise */}
+                        {(() => {
+                           const isInvited = (company.invitedSuperAdmins || []).includes(superAdminEmail);
+                           console.log('Company:', company.id, 'superAdminEmail:', superAdminEmail, 'invitedSuperAdmins:', company.invitedSuperAdmins, 'isInvited:', isInvited);
+                           return userRole === 'ADMIN' && (
+                             <div className="flex items-center gap-1 transition-opacity">
+                             {isInvited ? (
+                               <button
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleRemoveSuperAdminInvite(company.id);
+                                 }}
+                                 className="p-2 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+                                 title="Retirer l'invitation du super admin"
+                               >
+                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                 </svg>
+                               </button>
+                             ) : (
+                               <button
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleInviteSuperAdmin(company.id);
+                                 }}
+                                 className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                 title="Inviter le super admin"
+                               >
+                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                 </svg>
+                               </button>
+                             )}
+                             </div>
+                           );
+                         })()}
                       </div>
                     </div>
                   </div>
@@ -555,6 +716,7 @@ const CompanyList = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

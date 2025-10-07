@@ -17,6 +17,7 @@ const Dashboard = () => {
         setLoading(true);
         setError(null);
 
+
         // Pour le super admin, afficher des stats globales ou un message
         if (userRole === 'SUPER_ADMIN') {
           setStats([
@@ -281,7 +282,7 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [userRole]);
 
   const upcomingPayments = [
     { employee: 'Mamadou Diop', poste: 'Développeur', montant: '750 000 FCFA', date: '05 Oct 2025' },
@@ -396,8 +397,9 @@ const Dashboard = () => {
 
         {/* Upcoming Payments - Seulement pour admin */}
         {userRole === 'ADMIN' && (
-          <div className="bg-[#e6faef] rounded-xl shadow-md border border-[#22c55e]">
-
+          <div className="bg-[#e6faef] rounded-xl shadow-md border border-[#22c55e] p-8">
+            <h3 className="text-xl font-bold text-[#22c55e] mb-4">Paiements à venir</h3>
+            <p className="text-gray-600">Aucun paiement programmé pour le moment.</p>
           </div>
         )}
 

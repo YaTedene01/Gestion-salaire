@@ -3,9 +3,31 @@ import { getSelectedCompany } from '../utils/company';
 import { useSelectedCompany } from '../utils/useCompanyColor';
 import { Link, useLocation } from 'react-router-dom';
 
-const getMenuItems = (userRole) => {
+const getMenuItems = (userRole, hasCompanyAdminAccess, originalUserRole) => {
+  // If superadmin in company mode, show ONLY admin menu (no companies navigation)
+  if (originalUserRole === 'SUPER_ADMIN' && hasCompanyAdminAccess) {
+    return [
+      { path: '/dashboard', label: 'Dashboard' },
+      { path: '/users', label: 'Utilisateurs' },
+      { path: '/employees', label: 'Employés' },
+      { path: '/attendance', label: 'Présences' },
+      { path: '/payruns', label: 'Cycles de Paie' },
+    ];
+  }
+
   switch (userRole) {
     case 'SUPER_ADMIN':
+      // If superadmin has company access, show admin menu
+      if (hasCompanyAdminAccess) {
+        return [
+          { path: '/dashboard', label: 'Dashboard' },
+          { path: '/users', label: 'Utilisateurs' },
+          { path: '/employees', label: 'Employés' },
+          { path: '/attendance', label: 'Présences' },
+          { path: '/payruns', label: 'Cycles de Paie' },
+        ];
+      }
+      // Otherwise show superadmin menu
       return [
         { path: '/dashboard', label: 'Dashboard' },
         { path: '/companies', label: 'Entreprises' },
@@ -34,7 +56,7 @@ const getMenuItems = (userRole) => {
 
 import { LogOut } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = ({ hasCompanyAdminAccess, effectiveRole }) => {
   const location = useLocation();
   const userRole = localStorage.getItem('role');
 
@@ -47,7 +69,7 @@ const Sidebar = () => {
 
   const selectedCompany = useSelectedCompany();
 
-  const menuItems = getMenuItems(userRole);
+  const menuItems = getMenuItems(effectiveRole || userRole, hasCompanyAdminAccess, userRole);
 
   return (
     <aside className="w-60 h-screen flex flex-col bg-white shadow-xl overflow-hidden fixed top-0 left-0 z-30">

@@ -75,19 +75,20 @@ model User {
 }
 
 model Company {
-  id        Int      @id @default(autoincrement())
-  name      String
-  logo      String?
-  color     String   @default("#3b82f6")
-  address   String?
-  currency  String  @default("FCFA")
-  period    PeriodType @default(MENSUEL)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  users     User[]
-  employees Employee[]
-  payRuns   PayRun[]
+  id               Int      @id @default(autoincrement())
+  name             String
+  logo             String?
+  color            String   @default("#3b82f6")
+  address          String?
+  currency         String  @default("FCFA")
+  period           PeriodType @default(MENSUEL)
+  isActive         Boolean  @default(true)
+  invitedSuperAdmins String[] // Array of super admin emails who are invited
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  users            User[]
+  employees        Employee[]
+  payRuns          PayRun[]
 }
 
 enum Role {

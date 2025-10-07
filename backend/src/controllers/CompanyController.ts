@@ -90,4 +90,52 @@ export class CompanyController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  static async inviteSuperAdmin(req: Request, res: Response) {
+    try {
+      const companyId = Number(req.params.id);
+      const { superAdminEmail } = req.body;
+
+      if (!superAdminEmail) {
+        return res.status(400).json({ error: 'Email du super admin requis' });
+      }
+
+      const company = await CompanyService.inviteSuperAdmin(companyId, superAdminEmail);
+      res.json(company);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  static async removeSuperAdminInvite(req: Request, res: Response) {
+    try {
+      const companyId = Number(req.params.id);
+      const { superAdminEmail } = req.body;
+
+      if (!superAdminEmail) {
+        return res.status(400).json({ error: 'Email du super admin requis' });
+      }
+
+      const company = await CompanyService.removeSuperAdminInvite(companyId, superAdminEmail);
+      res.json(company);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  static async checkSuperAdminAccess(req: Request, res: Response) {
+    try {
+      const companyId = Number(req.params.id);
+      const { superAdminEmail } = req.query;
+
+      if (!superAdminEmail) {
+        return res.status(400).json({ error: 'Email du super admin requis' });
+      }
+
+      const hasAccess = await CompanyService.checkSuperAdminAccess(companyId, superAdminEmail as string);
+      res.json({ hasAccess });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  }
 }

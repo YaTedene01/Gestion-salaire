@@ -70,6 +70,8 @@ export const companyAPI = {
   update: (id, data) => api.put(`/companies/${id}`, data),
   setActive: (id, isActive) => api.patch(`/companies/${id}/active`, { isActive }),
   delete: (id) => api.delete(`/companies/${id}`),
+  inviteSuperAdmin: (id, data) => api.post(`/companies/${id}/invite-super-admin`, data),
+  removeSuperAdminInvite: (id, data) => api.delete(`/companies/${id}/invite-super-admin`, { data }),
 };
 
 export const employeeAPI = {

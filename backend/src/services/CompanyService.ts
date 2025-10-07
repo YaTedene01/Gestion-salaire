@@ -63,4 +63,48 @@ export class CompanyService {
   static async setActive(id: number, isActive: boolean) {
     return prisma.company.update({ where: { id }, data: { isActive } });
   }
+
+  static async inviteSuperAdmin(companyId: number, superAdminEmail: string) {
+    const company = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!company) throw new Error('Entreprise non trouvée');
+
+    // Check if super admin exists and has SUPER_ADMIN role
+    const superAdmin = await prisma.user.findFirst({
+      where: { email: superAdminEmail, role: 'SUPER_ADMIN' }
+    });
+    if (!superAdmin) throw new Error('Super admin non trouvé');
+
+    // Add to invited list if not already there
+    const invitedSuperAdmins = company.invitedSuperAdmins || [];
+    if (!invitedSuperAdmins.includes(superAdminEmail)) {
+      invitedSuperAdmins.push(superAdminEmail);
+    }
+
+    return prisma.company.update({
+      where: { id: companyId },
+      data: { invitedSuperAdmins }
+    });
+  }
+
+  static async removeSuperAdminInvite(companyId: number, superAdminEmail: string) {
+    const company = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!company) throw new Error('Entreprise non trouvée');
+
+    // Remove from invited list
+    const invitedSuperAdmins = company.invitedSuperAdmins || [];
+    const updatedList = invitedSuperAdmins.filter(email => email !== superAdminEmail);
+
+    return prisma.company.update({
+      where: { id: companyId },
+      data: { invitedSuperAdmins: updatedList }
+    });
+  }
+
+  static async checkSuperAdminAccess(companyId: number, superAdminEmail: string): Promise<boolean> {
+    const company = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!company) return false;
+
+    const invitedSuperAdmins = company.invitedSuperAdmins || [];
+    return invitedSuperAdmins.includes(superAdminEmail);
+  }
 }

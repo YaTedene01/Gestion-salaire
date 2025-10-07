@@ -28,4 +28,9 @@ router.put('/:id', AuthMiddleware.authorize('SUPER_ADMIN'), CompanyController.up
 router.patch('/:id/active', AuthMiddleware.authorize('SUPER_ADMIN'), CompanyController.setActive);
 router.delete('/:id', AuthMiddleware.authorize('SUPER_ADMIN'), CompanyController.delete);
 
+// Super admin invitation routes
+router.post('/:id/invite-super-admin', AuthMiddleware.authorize('ADMIN'), CompanyController.inviteSuperAdmin);
+router.delete('/:id/invite-super-admin', AuthMiddleware.authorize('ADMIN'), CompanyController.removeSuperAdminInvite);
+router.get('/:id/check-super-admin-access', CompanyController.checkSuperAdminAccess);
+
 export default router;
