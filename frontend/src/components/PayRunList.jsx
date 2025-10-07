@@ -52,9 +52,6 @@ const PayRunList = () => {
 
   // Delete payrun
   const handleDeletePayRun = async (payrunId) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce cycle de paie ? Tous les bulletins associés seront supprimés.')) {
-      return;
-    }
     try {
       await execute(payrunAPI.delete, payrunId);
       setPayruns(payruns.filter(p => p.id !== payrunId));

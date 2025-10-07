@@ -106,8 +106,37 @@ export class PaymentService {
     return payment;
   }
 
-  static async getAll() {
+  static async getAll(user?: { id: number; role: string; companyId?: number }) {
+    // If user is SUPER_ADMIN, return all payments (they can see everything)
+    if (user?.role === 'SUPER_ADMIN') {
+      return prisma.payment.findMany({
+        include: {
+          paySlip: {
+            include: {
+              employee: {
+                include: { company: true }
+              },
+              payRun: true
+            }
+          }
+        },
+        orderBy: { date: 'desc' }
+      });
+    }
+
+    // For other users (ADMIN, CASHIER), filter by their company
+    if (!user?.companyId) {
+      return []; // No company, no payments
+    }
+
     return prisma.payment.findMany({
+      where: {
+        paySlip: {
+          employee: {
+            companyId: user.companyId
+          }
+        }
+      },
       include: {
         paySlip: {
           include: {

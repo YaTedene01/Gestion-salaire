@@ -67,6 +67,10 @@ function AppContent() {
   const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   const isSuperAdminInCompany = userRole === 'SUPER_ADMIN' && selectedCompanyId;
 
+  // Check if superadmin is already invited to current company
+  const [isSuperAdminInvited, setIsSuperAdminInvited] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
+
   // Couleur dynamique selon l'entreprise sélectionnée
   const [companyColor, setCompanyColor] = useState('#22c55e');
 
@@ -80,12 +84,62 @@ function AppContent() {
     return () => window.removeEventListener('storage', updateColor);
   }, []);
 
+  // Check superadmin invitation status when company changes
+  useEffect(() => {
+    if (userRole === 'ADMIN' && selectedCompanyId) {
+      checkSuperAdminInvitation();
+    }
+  }, [selectedCompanyId, userRole]);
+
+  // Function to check if superadmin is invited
+  const checkSuperAdminInvitation = async () => {
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    if (!selectedCompanyId) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/companies/${selectedCompanyId}/check-super-admin-access?superAdminEmail=superadmin@demo.com`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      setIsSuperAdminInvited(data.hasAccess);
+    } catch (error) {
+      console.error('Error checking invitation status:', error);
+    }
+  };
+
   // Function to invite superadmin
   const handleInviteSuperAdmin = async () => {
     const selectedCompanyId = localStorage.getItem('selectedCompanyId');
     if (!selectedCompanyId) return;
 
-    await companyAPI.inviteSuperAdmin(selectedCompanyId, { superAdminEmail: 'superadmin@demo.com' });
+    try {
+      setInviteLoading(true);
+      await companyAPI.inviteSuperAdmin(selectedCompanyId, { superAdminEmail: 'superadmin@demo.com' });
+      setIsSuperAdminInvited(true);
+    } catch (error) {
+      console.error('Error inviting superadmin:', error);
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  // Function to remove superadmin invitation
+  const handleRemoveSuperAdminInvite = async () => {
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    if (!selectedCompanyId) return;
+
+    try {
+      setInviteLoading(true);
+      await companyAPI.removeSuperAdminInvite(selectedCompanyId, { superAdminEmail: 'superadmin@demo.com' });
+      setIsSuperAdminInvited(false);
+    } catch (error) {
+      console.error('Error removing invitation:', error);
+    } finally {
+      setInviteLoading(false);
+    }
   };
 
   // Function to go back to superadmin
@@ -130,10 +184,18 @@ function AppContent() {
                         </button>
                       ) : userRole === 'ADMIN' ? (
                         <button
-                          onClick={handleInviteSuperAdmin}
-                          className="bg-black text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-all"
+                          onClick={isSuperAdminInvited ? handleRemoveSuperAdminInvite : handleInviteSuperAdmin}
+                          disabled={inviteLoading}
+                          className="bg-black text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                          Inviter Superadmin
+                          {inviteLoading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              {isSuperAdminInvited ? 'Suppression...' : 'Invitation...'}
+                            </>
+                          ) : (
+                            isSuperAdminInvited ? 'Arrêter l\'invitation' : 'Inviter Superadmin'
+                          )}
                         </button>
                       ) : null}
                     </div>
