@@ -74,9 +74,6 @@ const PaySlipList = () => {
   };
 
   const handleDelete = async (payslipId) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce bulletin ?')) {
-      return;
-    }
     try {
       await execute(payslipAPI.delete, payslipId);
       setPayslips(payslips.filter(p => p.id !== payslipId));

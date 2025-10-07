@@ -24,6 +24,7 @@ router.use((req: any, res, next) => {
 
 router.get('/', PaySlipController.getAll);
 router.get('/:id', PaySlipController.getById);
+router.get('/:id/pdf', PaySlipController.generatePDF);
 router.put('/:id', AuthMiddleware.authorize('ADMIN'), PaySlipController.update);
 router.delete('/:id', AuthMiddleware.authorize('ADMIN'), PaySlipController.delete);
 

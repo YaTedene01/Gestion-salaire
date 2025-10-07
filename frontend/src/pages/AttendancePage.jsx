@@ -158,7 +158,7 @@ const AttendancePage = () => {
   return (
     <div className="w-full max-w-7xl mx-auto py-8 px-4 flex flex-col items-center">
       {/* Header */}
-      <div className="w-full max-w-6xl bg-[var(--company-color-bg)] rounded-xl shadow-lg border border-[var(--company-color)] overflow-hidden mb-8">
+      <div className="w-full max-w-4xl bg-[var(--company-color-bg)] rounded-xl shadow-lg border border-[var(--company-color)] overflow-hidden mb-8 mx-auto">
         <div className="bg-[var(--company-color)] px-6 py-4">
           <div className="flex items-center justify-center">
             <div className="flex items-center gap-3">
@@ -227,7 +227,7 @@ const AttendancePage = () => {
       </div>
 
       {/* Attendance Records */}
-      <div className="w-full max-w-6xl bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      <div className="w-full max-w-4xl bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mx-auto">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-center">
           <h2 className="text-lg font-semibold text-gray-900 text-center">Registres du {new Date(selectedDate).toLocaleDateString('fr-FR')}</h2>
         </div>

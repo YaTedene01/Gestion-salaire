@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import jsQR from 'jsqr';
 import { Camera, X, CheckCircle, AlertCircle } from 'lucide-react';
 
 const QRScanner = ({ onScan, onClose }) => {
@@ -43,26 +44,7 @@ const QRScanner = ({ onScan, onClose }) => {
 
   const onScanSuccess = async (decodedText, decodedResult) => {
     if (!scanning) return;
-
-    setScanning(false);
-    setLastScanned(decodedText);
-    setError('');
-
-    try {
-      const result = await onScan(decodedText);
-
-      if (result.success) {
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        setError(result.error || 'Erreur lors de l\'enregistrement');
-        setScanning(true);
-      }
-    } catch (err) {
-      setError('Erreur lors du scan');
-      setScanning(true);
-    }
+    await processQRCode(decodedText);
   };
 
   const onScanError = (errorMessage) => {
@@ -82,20 +64,78 @@ const QRScanner = ({ onScan, onClose }) => {
     }
   };
 
+  const processQRCode = async (qrData) => {
+    setScanning(false);
+    setLastScanned(qrData);
+    setError('');
+
+    try {
+      const result = await onScan(qrData);
+
+      if (result.success) {
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        setError(result.error || 'Erreur lors de l\'enregistrement');
+        setScanning(true);
+      }
+    } catch (err) {
+      setError('Erreur lors du scan');
+      setScanning(true);
+    }
+  };
+
   const handleFileUpload = async (file) => {
     try {
-      // For demo purposes, we'll simulate QR code scanning from image
-      // In a real implementation, you'd use a QR scanning library here
-      const mockQRData = JSON.stringify({
-        employeeId: 1,
-        fullName: "Test Employee",
-        companyId: 1,
-        timestamp: Date.now()
-      });
+      setError('');
+      setScanning(true);
 
-      await processQRCode(mockQRData);
+      // Create a canvas to draw the image and extract image data
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        // Set canvas size to image size
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // Draw image to canvas
+        ctx.drawImage(img, 0, 0);
+
+        // Get image data
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        // Scan for QR code using jsQR
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+        if (code) {
+          // QR code found
+          processQRCode(code.data);
+        } else {
+          // No QR code found
+          setError('Aucun QR code trouvé dans l\'image');
+          setScanning(false);
+        }
+      };
+
+      img.onerror = () => {
+        setError('Erreur lors du chargement de l\'image');
+        setScanning(false);
+      };
+
+      // Load the image file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
     } catch (error) {
+      console.error('File upload error:', error);
       setError('Erreur lors de l\'analyse de l\'image');
+      setScanning(false);
     }
   };
 

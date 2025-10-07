@@ -78,15 +78,15 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo & Title */}
         <div className="text-center mb-8">
-         
-          <p className="text-blue-200">Psalaire</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Psalaire</h1>
+          <p className="text-blue-200">Système de Gestion des Salaires</p>
         </div>
 
         {/* Login Card */}
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
-          <div className="mb-6">
+          <div className="mb-6 text-center">
             <h2 className="text-2xl font-bold text-slate-800 mb-2">Connexion</h2>
-            <p className="text-slate-600">Accédez à votre espace de gestion</p>
+            <p className="text-slate-600 font-semibold">Accédez à votre espace de gestion</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -180,7 +180,7 @@ const Login = () => {
 
         {/* Version Info */}
         <div className="text-center mt-4">
-          <p className="text-green-300 text-xs">Version 1.0.0 - © 2025 Psalaire</p>
+          <p className="text-green-300 text-sm font-bold">Version 1.0.0 - © 2025 Psalaire</p>
         </div>
       </div>
 

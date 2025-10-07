@@ -129,6 +129,8 @@ export const payslipAPI = {
   getByPayRun: (payrunId) => api.get(`/payruns/${payrunId}/payslips`),
   getById: (id) => api.get(`/payslips/${id}`),
   update: (id, data) => api.put(`/payslips/${id}`, data),
+  delete: (id) => api.delete(`/payslips/${id}`),
+  generatePDF: (id) => api.get(`/payslips/${id}/pdf`),
 };
 
 export const userAPI = {

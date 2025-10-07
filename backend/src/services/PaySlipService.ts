@@ -9,10 +9,10 @@ export class PaySlipService {
     if (filters.payRunId) where.payRunId = filters.payRunId;
 
     // Filtrage par entreprise selon le rôle
-    if (filters.user?.role !== 'CASHIER' && filters.user?.companyId) {
+    if (filters.user?.role !== 'SUPER_ADMIN' && filters.user?.companyId) {
       where.payRun = { companyId: filters.user.companyId };
     }
-    // Le caissier voit tous les bulletins (pas de filtrage par entreprise)
+    // Seuls les super admins voient tous les bulletins
 
     return prisma.paySlip.findMany({
       where,
@@ -29,7 +29,9 @@ export class PaySlipService {
     const payslip = await prisma.paySlip.findUnique({
       where: { id },
       include: {
-        employee: true,
+        employee: {
+          include: { company: true }
+        },
         payRun: true,
         payments: { orderBy: { date: 'asc' } }
       }
@@ -64,6 +66,12 @@ export class PaySlipService {
   }
 
   static async delete(id: number) {
+    // First delete associated payments
+    await prisma.payment.deleteMany({
+      where: { paySlipId: id }
+    });
+
+    // Then delete the payslip
     return prisma.paySlip.delete({ where: { id } });
   }
 }

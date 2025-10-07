@@ -30,6 +30,17 @@ const PaySlipDetail = () => {
     fetchData();
   }, [id]);
 
+  const handleDownloadPDF = async () => {
+    try {
+      const response = await payslipAPI.generatePDF(id);
+      const pdfUrl = `http://localhost:5000${response.data.pdfUrl}`;
+      window.open(pdfUrl, '_blank');
+    } catch (error) {
+      console.error('Erreur lors du téléchargement du PDF:', error);
+      alert('Erreur lors du téléchargement du PDF');
+    }
+  };
+
 
   if (!payslip || !payrun) {
     return <div className="text-center py-8">Chargement...</div>;
@@ -178,7 +189,11 @@ const PaySlipDetail = () => {
               <p className="font-semibold">{new Date().toLocaleDateString()}</p>
             </div>
             <div>
-              <button className="text-white px-4 py-2 rounded" style={{ backgroundColor: 'var(--company-color)' }}>
+              <button
+                onClick={handleDownloadPDF}
+                className="text-white px-4 py-2 rounded hover:opacity-90 transition"
+                style={{ backgroundColor: 'var(--company-color)' }}
+              >
                 Télécharger PDF
               </button>
             </div>

@@ -99,7 +99,7 @@ const PayRunList = () => {
         <PayRunForm onAdd={handleAddPayrun} />
 
         {/* List of payruns */}
-        <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden max-w-4xl mx-auto">
           <div className="px-6 py-4 text-center" style={{ backgroundColor: 'var(--company-color)' }}>
             <div className="flex items-center justify-center gap-3">
               <div className="bg-white/20 p-2 rounded-lg">

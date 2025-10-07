@@ -422,6 +422,7 @@ const CompanyList = () => {
                   style={company.isActive ? { borderColor: 'var(--company-color-border)' } : {}}
                   onClick={() => {
                     if (!company.isActive) return; // Ne rien faire si l'entreprise est inactive
+                    if (userRole === 'SUPER_ADMIN') return; // Super admin ne peut pas sélectionner d'entreprise
                     localStorage.setItem('selectedCompanyId', company.id);
                     window.dispatchEvent(new Event('storage'));
                     // Redirection vers le dashboard après sélection

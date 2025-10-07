@@ -57,10 +57,6 @@ const PaySlipListCashier = () => {
   };
 
   const handleRecordPayment = async (payslip) => {
-    if (!window.confirm(`Confirmer le paiement de ${formatSalary(payslip.netSalary)} FCFA pour ${payslip.employee?.fullName} ?`)) {
-      return;
-    }
-
     try {
       // Enregistrer le paiement automatique du montant total
       const response = await fetch('http://localhost:5000/api/payments', {
@@ -114,7 +110,7 @@ const PaySlipListCashier = () => {
         </div>
 
         {/* List of approved payslips */}
-        <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden max-w-4xl mx-auto">
           <div className="px-6 py-4 text-center" style={{ backgroundColor: 'var(--company-color)' }}>
             <div className="bg-white/20 p-2 rounded-lg">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
