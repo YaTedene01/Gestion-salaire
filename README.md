@@ -2,47 +2,90 @@
 
 Un système complet de gestion des salaires avec pointage automatique par QR code pour les entreprises.
 
+## 🆕 Nouveautés (Version 2.0)
+
+### 🔑 Système d'Invitation Super Admin
+- **Bouton toggle** dans le header admin : "Inviter Superadmin" ↔ "Arrêter l'invitation"
+- **Accès temporaire complet** : Super admin obtient tous les droits admin sur l'entreprise
+- **Isolation sécurisée** : Chaque entreprise voit seulement ses propres données
+- **Navigation fluide** : Bouton "Retour" pour quitter le mode entreprise
+
+### 🔔 Notifications Toast Modernes
+- **Remplacement des alertes** par des notifications élégantes
+- **Suppression directe** des cycles de paie sans confirmation
+- **Feedback visuel** amélioré pour toutes les actions
+
+### 🔒 Sécurité Renforcée
+- **Filtrage automatique** des paiements par entreprise pour les caissiers
+- **Isolation des données** : Chaque rôle voit seulement les données pertinentes
+- **Accès contrôlé** pour les super admins invités
+
+### 🎨 Améliorations UI/UX
+- **Centrage du cadre** des bulletins de salaire
+- **Interface adaptative** selon le rôle utilisateur
+- **Boutons intelligents** avec états dynamiques
+
 ## 🚀 Fonctionnalités
 
 ### 👥 Gestion des Utilisateurs
-- **Super Admin** : Gestion globale du système
-- **Admin** : Gestion des employés et salaires par entreprise
-- **Caissier** : Gestion des paiements
+- **Super Admin** : Gestion globale du système avec accès invité aux entreprises
+- **Admin** : Gestion complète des employés et salaires par entreprise
+- **Caissier** : Gestion des paiements avec historique filtré par entreprise
 - **Utilisateur** : Accès limité aux bulletins de salaire
 
 ### 🏢 Gestion des Entreprises
 - Création et configuration d'entreprises
 - Personnalisation des couleurs et logos
 - Gestion des devises et périodes de paie
+- **Système d'invitation Super Admin** avec bouton toggle
+- Accès contrôlé pour les super admins invités
 
 ### 👨‍💼 Gestion des Employés
 - Ajout, modification et suppression d'employés
 - Gestion des contrats (journalier, fixe, honoraire)
 - Attribution automatique de QR codes pour le pointage
+- Import en masse via CSV
 
 ### 📊 Gestion des Salaires
 - Calcul automatique des bulletins de salaire
 - Gestion des déductions et avantages
 - Validation et approbation des bulletins
 - Historique complet des paiements
+- Cycles de paie avec génération groupée de bulletins
 
 ### 📱 Pointage par QR Code
 - **Génération automatique** de QR codes pour chaque employé
 - **Scanner professionnel** avec caméra ou upload d'image
 - **Détection automatique** des présences et retards
 - **Interface moderne** avec guides visuels
+- Suivi des heures travaillées pour contrats journaliers
 
 ### 💰 Gestion des Paiements
 - Enregistrement des paiements multiples
 - Génération automatique de reçus PDF
 - Suivi des paiements partiels et complets
 - Historique détaillé des transactions
+- **Filtrage automatique par entreprise** pour les caissiers
+- Modes de paiement multiples (Espèces, Virement, Orange Money, Wave, Free Money)
+
+### 🔐 Système d'Invitation Super Admin
+- **Bouton intelligent** dans le header admin : "Inviter Superadmin" / "Arrêter l'invitation"
+- **Accès temporaire** : Super admin invité a tous les droits admin sur l'entreprise
+- **Isolation des données** : Chaque entreprise voit seulement ses propres données
+- **Navigation sécurisée** : Bouton "Retour" pour quitter le mode entreprise
 
 ### 📈 Tableaux de Bord
-- Statistiques en temps réel
+- Statistiques en temps réel par entreprise
 - Rapports de présence par employé
 - Taux d'assiduité et performance
-- Visualisations graphiques
+- Visualisations graphiques (évolution salariale, paiements par mode)
+- **Dashboard adaptatif** selon le rôle utilisateur
+
+### 🔔 Notifications Toast
+- **Interface moderne** sans popups intrusifs
+- Notifications de succès, erreur et information
+- **Remplacement des alertes** par des toasts élégants
+- Suppression immédiate des cycles de paie sans confirmation
 
 ## 🛠️ Technologies Utilisées
 
@@ -62,6 +105,8 @@ Un système complet de gestion des salaires avec pointage automatique par QR cod
 - **Lucide React** pour les icônes
 - **html5-qrcode** pour le scanner QR
 - **Axios** pour les requêtes HTTP
+- **Toast System** pour les notifications élégantes
+- **Error Boundaries** pour la gestion d'erreurs
 
 ## 📋 Prérequis
 
@@ -150,25 +195,44 @@ Après le seeding, les comptes suivants sont disponibles :
 ### 2. Configuration d'entreprise (Super Admin)
 - Créer une nouvelle entreprise
 - Configurer les couleurs et paramètres
+- Inviter des super admins pour l'assistance
 
-### 3. Gestion des employés (Admin)
+### 3. Invitation Super Admin (Admin)
+- **Bouton header** : "Inviter Superadmin" (devient "Arrêter l'invitation")
+- **Accès temporaire** : Super admin obtient tous les droits admin
+- **Sécurité** : Isolation complète des données par entreprise
+
+### 4. Gestion des employés (Admin)
 - Ajouter des employés avec leurs informations
 - Générer automatiquement des QR codes
+- Import en masse via CSV
 
-### 4. Pointage des présences
+### 5. Cycles de Paie (Admin)
+- Créer des périodes de paie
+- Générer automatiquement tous les bulletins
+- Approuver et clôturer les cycles
+- **Suppression directe** sans confirmation (toast notification)
+
+### 6. Pointage des présences
 - **Employés** : Montrer leur QR code le matin
 - **Admins** : Scanner avec l'appareil ou uploader l'image
 - **Suivi** : Voir les statistiques en temps réel
 
-### 5. Gestion des salaires
-- Créer des périodes de paie
-- Calculer automatiquement les bulletins
-- Approuver et valider les paiements
+### 7. Gestion des salaires
+- Modifier les bulletins individuels
+- Calcul automatique des déductions
+- Validation et approbation des paiements
 
-### 6. Paiements
-- Enregistrer les paiements
-- Générer automatiquement les reçus PDF
-- Suivre l'historique des transactions
+### 8. Paiements (Caissier)
+- Enregistrer les paiements multiples
+- Génération automatique de reçus PDF
+- **Historique filtré** : Uniquement les paiements de son entreprise
+- Modes de paiement : Espèces, Virement, Orange Money, Wave, Free Money
+
+### 9. Accès Super Admin Invité
+- **Droits complets** : Même accès qu'un admin normal
+- **Isolation** : Voit seulement les données de l'entreprise qui l'a invité
+- **Navigation** : Bouton "Retour" pour quitter le mode entreprise
 
 ## 🔧 Structure du Projet
 
@@ -203,34 +267,53 @@ gestion-salaire/
 - **Validation des entrées** côté client et serveur
 - **Contrôle d'accès** basé sur les rôles
 - **Protection CSRF** et **CORS**
+- **Isolation des données** par entreprise (caissiers voient seulement leurs paiements)
+- **Accès contrôlé** pour les super admins invités
+- **Filtrage automatique** des données selon le rôle et l'entreprise
 
 ## 📊 API Endpoints
 
 ### Authentification
 - `POST /api/auth/login` - Connexion
 - `POST /api/auth/register` - Inscription
+- `POST /api/auth/create-admin` - Créer un administrateur
 
 ### Entreprises
 - `GET /api/companies` - Liste des entreprises
 - `POST /api/companies` - Créer une entreprise
+- `POST /api/companies/:id/invite-super-admin` - Inviter un super admin
+- `DELETE /api/companies/:id/invite-super-admin` - Retirer l'invitation super admin
+- `GET /api/companies/:id/check-super-admin-access` - Vérifier l'accès super admin
 
 ### Employés
 - `GET /api/employees` - Liste des employés
 - `POST /api/employees` - Ajouter un employé
+- `POST /api/employees/import` - Import CSV des employés
 
 ### Présences
 - `POST /api/attendance/scan` - Enregistrer une présence
 - `GET /api/attendance/company` - Présences de l'entreprise
 - `GET /api/attendance/employee/:id` - Présences d'un employé
 
+### Cycles de Paie
+- `GET /api/payruns` - Liste des cycles de paie
+- `POST /api/payruns` - Créer un cycle de paie
+- `POST /api/payruns/:id/generate` - Générer les bulletins
+- `PATCH /api/payruns/:id/status` - Changer le statut
+
 ### Salaires
 - `GET /api/payslips` - Liste des bulletins
-- `POST /api/payslips` - Créer un bulletin
-- `PUT /api/payslips/:id/approve` - Approuver un bulletin
+- `GET /api/payruns/:id/payslips` - Bulletins d'un cycle
+- `PUT /api/payslips/:id` - Modifier un bulletin
+- `GET /api/payslips/:id/pdf` - Télécharger PDF du bulletin
 
 ### Paiements
-- `GET /api/payments` - Liste des paiements
+- `GET /api/payments` - Liste des paiements (filtrés par entreprise)
 - `POST /api/payments` - Enregistrer un paiement
+
+### Utilisateurs
+- `GET /api/auth/users` - Liste des utilisateurs
+- `PATCH /api/auth/users/:id/active` - Activer/désactiver un utilisateur
 
 ## 🎨 Personnalisation
 
