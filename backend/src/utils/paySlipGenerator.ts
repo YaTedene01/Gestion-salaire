@@ -13,6 +13,7 @@ interface PaySlipData {
   employee: {
     fullName: string;
     position: string;
+    contractType: string;
     id: number;
   };
   paySlip: {
@@ -21,6 +22,7 @@ interface PaySlipData {
     deductions: number;
     netSalary: number;
     daysWorked?: number;
+    hoursWorked?: number;
     createdAt: Date;
   };
   payRun: {
@@ -55,7 +57,20 @@ export class PaySlipGenerator {
       const stream = fs.createWriteStream(filePath);
       doc.pipe(stream);
 
-      // Header - Company Info
+      // Header - Company Logo and Info
+      if (data.company.logo) {
+        try {
+          // Add company logo at the top center
+          const logoPath = path.join(__dirname, '../../uploads', data.company.logo);
+          if (fs.existsSync(logoPath)) {
+            doc.image(logoPath, (doc.page.width - 100) / 2, doc.y, { width: 100, height: 100 });
+            doc.moveDown(1);
+          }
+        } catch (error) {
+          console.error('Error adding logo to PDF:', error);
+        }
+      }
+
       doc.fontSize(24).font('Helvetica-Bold').text(data.company.name, { align: 'center' });
       doc.moveDown(0.5);
 
@@ -82,6 +97,7 @@ export class PaySlipGenerator {
       doc.text(`Nom complet: ${data.employee.fullName}`);
       doc.text(`Poste: ${data.employee.position}`);
       doc.text(`Matricule: ${data.employee.id}`);
+      doc.text(`Type de contrat: ${this.formatContractType(data.employee.contractType)}`);
       doc.moveDown();
 
       // Salary Details Section
@@ -127,13 +143,23 @@ export class PaySlipGenerator {
       doc.text(data.company.currency, col3X, yPos);
       yPos += 30;
 
-      // Days worked and attendance info (if applicable)
-      if (data.paySlip.daysWorked !== undefined && data.paySlip.daysWorked !== null) {
-        doc.font('Helvetica');
+      // Days worked and attendance info
+      doc.font('Helvetica');
+      if (data.employee.contractType === 'JOURNALIER' && data.paySlip.daysWorked !== undefined && data.paySlip.daysWorked !== null) {
         const totalWorkingDays = PaySlipGenerator.getWorkingDaysInRange(data.payRun.startDate, data.payRun.endDate);
         const attendanceRate = totalWorkingDays > 0 ? ((data.paySlip.daysWorked / totalWorkingDays) * 100).toFixed(1) : '0.0';
 
         doc.text(`Jours travaillés: ${data.paySlip.daysWorked}/${totalWorkingDays} (${attendanceRate}%)`, col1X, yPos);
+        yPos += 20;
+      } else if (data.employee.contractType === 'FIXE') {
+        doc.text(`22 jours travaillés`, col1X, yPos);
+        yPos += 20;
+      }
+
+      // Hours worked for honorarium employees (if applicable)
+      if (data.paySlip.hoursWorked !== undefined && data.paySlip.hoursWorked !== null && data.paySlip.hoursWorked > 0) {
+        doc.font('Helvetica');
+        doc.text(`Heures travaillées: ${data.paySlip.hoursWorked}h`, col1X, yPos);
         yPos += 20;
       }
 
@@ -175,6 +201,15 @@ export class PaySlipGenerator {
     const start = payRun.startDate.toLocaleDateString('fr-FR');
     const end = payRun.endDate.toLocaleDateString('fr-FR');
     return `${start} - ${end}`;
+  }
+
+  private static formatContractType(contractType: string): string {
+    const types: { [key: string]: string } = {
+      'FIXE': 'Contrat fixe',
+      'JOURNALIER': 'Contrat journalier',
+      'HONORAIRE': 'Contrat honoraire'
+    };
+    return types[contractType] || contractType;
   }
 
   private static formatPaymentMode(mode: string): string {

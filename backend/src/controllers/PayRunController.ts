@@ -50,7 +50,8 @@ export class PayRunController {
 
   static async generatePaySlips(req: Request, res: Response) {
     try {
-      const paySlips = await PayRunService.generatePaySlips(Number(req.params.id));
+      const { hoursData } = req.body; // hoursData should be an object like { employeeId: hours }
+      const paySlips = await PayRunService.generatePaySlips(Number(req.params.id), hoursData);
       res.json({ message: `${paySlips.length} bulletins générés`, paySlips });
     } catch (error: any) {
       res.status(400).json({ error: error.message });

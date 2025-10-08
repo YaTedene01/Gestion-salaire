@@ -135,6 +135,7 @@ model PaySlip {
   deductions  Float    @default(0)
   netSalary   Float
   daysWorked  Int?
+  hoursWorked Float?
   status      PaySlipStatus @default(PENDING)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

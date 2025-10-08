@@ -15,7 +15,12 @@ interface AuthRequest extends Request {
 export class EmployeeController {
   static async create(req: AuthRequest, res: Response) {
     try {
-      const employeeData = { ...req.body, companyId: req.user?.companyId };
+      // Check if user has company access
+      if (!req.user?.companyId) {
+        return res.status(403).json({ error: 'Accès entreprise requis pour créer un employé' });
+      }
+
+      const employeeData = { ...req.body, companyId: req.user.companyId };
       const employee = await EmployeeService.create(employeeData);
       res.status(201).json(employee);
     } catch (error: any) {
@@ -26,12 +31,20 @@ export class EmployeeController {
   static async getAll(req: AuthRequest, res: Response) {
     try {
       const { isActive, position, contractType } = req.query;
-      const employees = await EmployeeService.getAll({
-        companyId: req.user?.companyId,
+
+      // For super admins, don't filter by companyId to allow them to see employees
+      // when they have company access
+      const filters: any = {
         isActive: isActive !== undefined ? isActive === 'true' : undefined,
         position: position as string,
         contractType: contractType as any,
-      });
+      };
+
+      if (req.user?.role !== 'SUPER_ADMIN') {
+        filters.companyId = req.user?.companyId;
+      }
+
+      const employees = await EmployeeService.getAll(filters);
       res.json(employees);
     } catch (error: any) {
       res.status(400).json({ error: error.message });

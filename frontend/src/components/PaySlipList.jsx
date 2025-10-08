@@ -134,7 +134,7 @@ const PaySlipList = () => {
                     <p className="text-slate-600">{payslip.employee?.position}</p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-slate-500">Statut</p>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -178,6 +178,12 @@ const PaySlipList = () => {
                       <p className="text-sm text-slate-500">Net à payer</p>
                       <p className="text-lg font-bold text-[var(--company-color)]">{(editing === payslip.id ? (editData.grossSalary - editData.deductions) : payslip.netSalary)?.toLocaleString()} FCFA</p>
                     </div>
+                    {payslip.hoursWorked && (
+                      <div>
+                        <p className="text-sm text-slate-500">Heures travaillées</p>
+                        <p className="text-lg font-bold text-purple-600">{payslip.hoursWorked}h</p>
+                      </div>
+                    )}
                   </div>
 
                   {payslip.employee?.contractType === 'JOURNALIER' && (

@@ -31,8 +31,10 @@ const EmployeeForm = ({ onAdd }) => {
     setValidationErrors({});
 
     try {
+      console.log('Creating employee with data:', employeeData);
       const response = await execute(employeeAPI.create, employeeData);
       const newEmployee = response.data;
+      console.log('Employee created successfully:', newEmployee);
 
       // Réinitialiser le formulaire
       setForm({
@@ -45,7 +47,10 @@ const EmployeeForm = ({ onAdd }) => {
       });
 
       // Notifier le parent
-      if (onAdd) onAdd(newEmployee);
+      if (onAdd) {
+        console.log('Calling onAdd with new employee:', newEmployee);
+        onAdd(newEmployee);
+      }
     } catch (err) {
       // L'erreur est déjà gérée par useAsync
       console.error('Erreur lors de la création de l\'employé:', err);

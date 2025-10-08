@@ -92,7 +92,7 @@ export class PayRunService {
     return workingDays;
   }
 
-  static async generatePaySlips(payRunId: number) {
+  static async generatePaySlips(payRunId: number, hoursData?: { [employeeId: number]: number }) {
     const payRun = await prisma.payRun.findUnique({
       where: { id: payRunId },
     });
@@ -150,8 +150,12 @@ export class PayRunService {
         console.log(`Daily employee ${employee.fullName}: daily_rate=${employee.salary}, days_present=${daysWorked}/${totalWorkingDays}, attendance_rate=${(attendanceRate * 100).toFixed(1)}%`);
 
       } else if (employee.contractType === 'HONORAIRE') {
-        // Honorarium employees keep their fixed amount
-        console.log(`Honorarium employee ${employee.fullName}: fixed_amount=${employee.salary}`);
+        // Honorarium employees: salary = hourly rate, we need to track hours worked
+        // Use provided hours data or default to 40 hours
+        const hoursWorked = hoursData?.[employee.id] || 40;
+        grossSalary = employee.salary * hoursWorked;
+
+        console.log(`Honorarium employee ${employee.fullName}: hourly_rate=${employee.salary}, hours_worked=${hoursWorked}, gross=${grossSalary}`);
       } else if (employee.contractType === 'FIXE') {
         // Fixed monthly salary - no attendance calculation needed
         console.log(`Fixed employee ${employee.fullName}: monthly_salary=${employee.salary}`);
@@ -170,6 +174,7 @@ export class PayRunService {
           deductions,
           netSalary,
           daysWorked,
+          hoursWorked: employee.contractType === 'HONORAIRE' ? (hoursData?.[employee.id] || 40) : undefined,
         },
       });
 

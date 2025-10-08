@@ -8,6 +8,7 @@ export class PaySlip {
   deductions: number;
   netSalary: number;
   daysWorked?: number;
+  hoursWorked?: number;
   status: PaySlipStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +21,7 @@ export class PaySlip {
     this.deductions = data.deductions;
     this.netSalary = data.netSalary;
     this.daysWorked = data.daysWorked || undefined;
+    this.hoursWorked = data.hoursWorked || undefined;
     this.status = data.status;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;

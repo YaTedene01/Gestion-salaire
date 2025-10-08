@@ -2,28 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { Users, UserCheck, UserX, Edit, Trash2, DollarSign, Briefcase, FileText, Upload, QrCode, Eye } from 'lucide-react';
 import EmployeeForm from './EmployeeForm';
 import { employeeAPI } from '../utils/api';
+import { useToast } from '../utils/useToast';
+import ToastContainer from './ToastContainer';
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [importFile, setImportFile] = useState(null);
   const [importLoading, setImportLoading] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [qrModal, setQrModal] = useState({ show: false, employee: null, qrCode: null });
   const [generatingQR, setGeneratingQR] = useState(false);
+  const { toasts, success, error, removeToast } = useToast();
   const userRole = localStorage.getItem('role');
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
         setLoading(true);
-        setError('');
         const response = await employeeAPI.getAll();
         setEmployees(response.data);
       } catch (err) {
         console.error('Erreur lors du chargement des employés:', err);
-        setError('Erreur lors du chargement des employés');
+        error('Erreur lors du chargement des employés');
       } finally {
         setLoading(false);
       }
@@ -33,7 +34,10 @@ const EmployeeList = () => {
   }, []);
 
   const handleAdd = (newEmp) => {
+    console.log('Adding new employee to list:', newEmp);
+    console.log('Current employees count:', employees.length);
     setEmployees([newEmp, ...employees]);
+    console.log('New employees count after add:', employees.length + 1);
   };
 
   const handleImport = async () => {
@@ -49,7 +53,7 @@ const EmployeeList = () => {
       setImportFile(null);
     } catch (err) {
       console.error('Erreur lors de l\'import:', err);
-      setImportMessage('Erreur lors de l\'import');
+      showError('Erreur lors de l\'import des employés');
     } finally {
       setImportLoading(false);
     }
@@ -61,18 +65,21 @@ const EmployeeList = () => {
       setEmployees(employees.map(e => e.id === id ? { ...e, isActive } : e));
     } catch (err) {
       console.error('Erreur lors de la modification du statut:', err);
-      setError('Erreur lors de la modification du statut de l\'employé');
+      showError('Erreur lors de la modification du statut de l\'employé');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')) return;
+    const employee = employees.find(e => e.id === id);
+    if (!employee) return;
+
     try {
       await employeeAPI.delete(id);
       setEmployees(employees.filter(e => e.id !== id));
+      success(`Employé "${employee.fullName}" supprimé avec succès`);
     } catch (err) {
       console.error('Erreur lors de la suppression:', err);
-      setError('Erreur lors de la suppression de l\'employé');
+      showError('Erreur lors de la suppression de l\'employé');
     }
   };
 
@@ -83,7 +90,7 @@ const EmployeeList = () => {
       setQrModal({ show: true, employee, qrCode: response.data.qrCode });
     } catch (err) {
       console.error('Erreur lors de la génération du QR code:', err);
-      setError('Erreur lors de la génération du QR code');
+      showError('Erreur lors de la génération du QR code');
     } finally {
       setGeneratingQR(false);
     }
@@ -95,7 +102,7 @@ const EmployeeList = () => {
       setQrModal({ show: true, employee, qrCode: response.data.qrCode });
     } catch (err) {
       console.error('Erreur lors de la récupération du QR code:', err);
-      setError('Erreur lors de la récupération du QR code');
+      showError('Erreur lors de la récupération du QR code');
     }
   };
 
@@ -109,7 +116,7 @@ const EmployeeList = () => {
       setEmployees(employeesResponse.data);
     } catch (err) {
       console.error('Erreur lors de la génération des QR codes:', err);
-      setError('Erreur lors de la génération des QR codes');
+      showError('Erreur lors de la génération des QR codes');
     } finally {
       setGeneratingQR(false);
     }
@@ -199,15 +206,6 @@ const EmployeeList = () => {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 m-6">
-            <div className="flex">
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -423,6 +421,9 @@ const EmployeeList = () => {
           </div>
         </div>
       )}
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 };

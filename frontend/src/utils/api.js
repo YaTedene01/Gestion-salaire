@@ -122,7 +122,7 @@ export const payrunAPI = {
   getAll: () => api.get('/payruns'),
   getById: (id) => api.get(`/payruns/${id}`),
   updateStatus: (id, status) => api.patch(`/payruns/${id}/status`, { status }),
-  generatePaySlips: (id) => api.post(`/payruns/${id}/generate`),
+  generatePaySlips: (id, data = {}) => api.post(`/payruns/${id}/generate`, data),
   delete: (id) => api.delete(`/payruns/${id}`),
 };
 

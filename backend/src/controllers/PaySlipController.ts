@@ -69,6 +69,7 @@ export class PaySlipController {
         employee: {
           fullName: payslip.employee.fullName,
           position: payslip.employee.position,
+          contractType: payslip.employee.contractType,
           id: payslip.employee.id
         },
         paySlip: {
@@ -77,6 +78,7 @@ export class PaySlipController {
           deductions: payslip.deductions,
           netSalary: payslip.netSalary,
           daysWorked: payslip.daysWorked || undefined,
+          hoursWorked: payslip.hoursWorked || undefined,
           createdAt: payslip.createdAt
         },
         payRun: {
